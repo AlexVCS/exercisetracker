@@ -39,12 +39,10 @@ app.post("/api/users", function (req, res) {
   });
 });
 
-app.get("/api/users", cors(), function (req, res, username, _id) {
-  // const query = req.params.newUser;
-  User.find({
-    username: username,
-    _id: _id,
-  });
+app.get("/api/users", function (req, res) {
+  User.find()
+    .then((users) => res.json(users))
+    .catch((err) => res.json(err));
 });
 
 app.post("/api/users/:_id/exercises", function (req, res) {
