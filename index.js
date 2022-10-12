@@ -65,7 +65,7 @@ function makeDate(string) {
 }
 
 app.post("/api/users/:_id/exercises", function (req, res) {
-  const id = req.body.id;
+  const { _id } = req.params;
   const description = req.body.description;
   const date = new Date().toDateString();
   const findUserById = (userId, success) => {
@@ -75,7 +75,7 @@ app.post("/api/users/:_id/exercises", function (req, res) {
     });
   };
   res.json({
-    _id: id,
+    _id: _id,
     // username: username,
     date: date,
     duration: 30,
