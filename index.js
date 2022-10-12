@@ -6,6 +6,7 @@ const cors = require("cors");
 require("dotenv").config();
 const myURI = process.env["MONGO_URI"];
 const crypto = require("crypto");
+const { doesNotMatch } = require("assert");
 
 app.use(cors());
 app.use(express.static("public"));
@@ -25,6 +26,18 @@ const userSchema = new mongoose.Schema({
 
 const User = mongoose.model("User", userSchema);
 
+app.get("/api/users", function (req, res) {
+  User.find()
+    .then((users) => res.json(users))
+    .catch((err) => res.json(err));
+});
+
+app.get("/api/users:_id/logs", function (req, res) {
+  res.json({
+    hi,
+  });
+});
+
 app.post("/api/users", function (req, res) {
   let nameToString = req.body.username.toString();
   let hash = crypto.randomBytes(20).toString("hex");
@@ -39,21 +52,34 @@ app.post("/api/users", function (req, res) {
   });
 });
 
-app.get("/api/users", function (req, res) {
-  User.find()
-    .then((users) => res.json(users))
-    .catch((err) => res.json(err));
-});
+function isNumbersOnly(string) {
+  return /^\d+$/.test(string);
+}
+
+function makeDate(string) {
+  if (isNumbersOnly(string)) {
+    return new Date(parseInt(string));
+  } else {
+    return new Date(string);
+  }
+}
 
 app.post("/api/users/:_id/exercises", function (req, res) {
-  // let username = req.body.username.toString();
-  const date = new Date();
+  const id = req.body.id;
+  const description = req.body.description;
+  const date = new Date().toDateString();
+  const findUserById = (userId, success) => {
+    User.findById(userId, (err, _id) => {
+      if (err) return console.log(err);
+      success(null, _id);
+    });
+  };
   res.json({
+    _id: id,
     // username: username,
-    description: "pushup",
+    date: date,
     duration: 30,
-    date: date.toDateString(),
-    _id: "1",
+    description: description,
   });
 });
 
