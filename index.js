@@ -22,6 +22,7 @@ mongoose.connect(`${myURI}`);
 const userSchema = new mongoose.Schema({
   username: String,
   _id: String,
+  log: [],
 });
 
 const User = mongoose.model("User", userSchema);
@@ -32,24 +33,32 @@ app.get("/api/users", function (req, res) {
     .catch((err) => res.json(err));
 });
 
-app.get("/api/users:_id/logs", function (req, res) {
-  res.json({
-    hi,
+app.get("/api/users/:_id/logs", function (req, res) {
+  const id = req.params._id;
+  return User.findById(id, (err, userRecord) => {
+    if (err) {
+      console.log(err);
+    } else {
+      res.json({
+        _id: id.toString(),
+        username: userRecord.username,
+        count: userRecord.log.length,
+        log: userRecord.log,
+      });
+    }
   });
 });
 
-app.post("/api/users", function (req, res) {
+app.post("/api/users", async function (req, res) {
   let nameToString = req.body.username.toString();
   let hash = crypto.randomBytes(20).toString("hex");
   const newUser = new User({
     username: nameToString,
     _id: hash,
+    log: [],
   });
-  const { username, _id } = newUser.save();
-  res.json({
-    username: nameToString,
-    _id: hash,
-  });
+  const userRecord = await newUser.save();
+  res.json(userRecord);
 });
 
 function isNumbersOnly(string) {
@@ -64,23 +73,46 @@ function makeDate(string) {
   }
 }
 
-app.post("/api/users/:_id/exercises", function (req, res) {
-  const { _id } = req.params;
-  const description = req.body.description;
-  const date = new Date().toDateString();
-  const findUserById = (userId, success) => {
-    User.findById(userId, (err, _id) => {
-      if (err) return console.log(err);
-      success(null, _id);
-    });
-  };
-  res.json({
-    _id: _id,
-    // username: username,
-    date: date,
-    duration: 30,
-    description: description,
+app.post("/api/users/:_id/exercises", function (req, res, saveData) {
+  const id = req.params._id;
+  const { date, duration, description } = req.body;
+  const username = User.findById(id, (err, userRecord) => {
+    if (err) {
+      console.log(err);
+    } else {
+      userRecord.log.push({ date, duration, description });
+      userRecord.save();
+      res.json({
+        id: id,
+        date: date,
+      });
+    }
   });
+  // console.log(username);
+  // saveData(id, username, date, duration, description, async (error) => {
+  //   if (!error) {
+  //     const newExercise = new User({
+  //       id: id,
+  //       username: username,
+  //       date: date,
+  //       duration: duration,
+  //       description,
+  //     });
+  //     const { id, username, date, duration, description } =
+  //       await newExercise.save();
+  //     res.json({
+  //       _id: id,
+  //       username: username,
+  //       date: date,
+  //       duration: duration,
+  //       description: description,
+  //     });
+  //   } else {
+  //     res.json({
+  //       error: "error",
+  //     });
+  //   }
+  // });
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
