@@ -61,22 +61,17 @@ app.post("/api/users", async function (req, res) {
   res.json(userRecord);
 });
 
-function isNumbersOnly(string) {
-  return /^\d+$/.test(string);
-}
-
-function makeDate(string) {
-  if (isNumbersOnly(string)) {
-    return new Date(parseInt(string));
-  } else {
-    return new Date(string);
-  }
-}
-
-app.post("/api/users/:_id/exercises", function (req, res, saveData) {
+app.post("/api/users/:_id/exercises", function (req, res) {
   const id = req.params._id;
   const { date, duration, description } = req.body;
-  const username = User.findById(id, (err, userRecord) => {
+  function makeDate(string) {
+    if (!date) {
+      return new Date().toDateString();
+    } else {
+      return new Date(string).toDateString();
+    }
+  }
+  User.findById(id, (err, userRecord) => {
     if (err) {
       console.log(err);
     } else {
@@ -84,7 +79,7 @@ app.post("/api/users/:_id/exercises", function (req, res, saveData) {
       userRecord.save();
       res.json({
         id: id,
-        date: date,
+        date: makeDate(date),
       });
     }
   });
