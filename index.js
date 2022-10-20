@@ -58,7 +58,10 @@ app.post("/api/users", async function (req, res) {
     log: [],
   });
   const userRecord = await newUser.save();
-  res.json(userRecord);
+  res.json({
+    _id: userRecord._id,
+    username: userRecord.username,
+  });
 });
 
 app.post("/api/users/:_id/exercises", function (req, res) {
@@ -81,7 +84,7 @@ app.post("/api/users/:_id/exercises", function (req, res) {
         id: id,
         username: userRecord.username,
         date: makeDate(date),
-        duration: duration,
+        duration: parseInt(duration),
         description: description,
       });
     }
