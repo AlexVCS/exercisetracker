@@ -79,35 +79,13 @@ app.post("/api/users/:_id/exercises", function (req, res) {
       userRecord.save();
       res.json({
         id: id,
+        username: userRecord.username,
         date: makeDate(date),
+        duration: duration,
+        description: description,
       });
     }
   });
-  // console.log(username);
-  // saveData(id, username, date, duration, description, async (error) => {
-  //   if (!error) {
-  //     const newExercise = new User({
-  //       id: id,
-  //       username: username,
-  //       date: date,
-  //       duration: duration,
-  //       description,
-  //     });
-  //     const { id, username, date, duration, description } =
-  //       await newExercise.save();
-  //     res.json({
-  //       _id: id,
-  //       username: username,
-  //       date: date,
-  //       duration: duration,
-  //       description: description,
-  //     });
-  //   } else {
-  //     res.json({
-  //       error: "error",
-  //     });
-  //   }
-  // });
 });
 
 const listener = app.listen(process.env.PORT || 3000, () => {
