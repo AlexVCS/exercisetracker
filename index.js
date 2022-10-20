@@ -33,7 +33,7 @@ app.get("/api/users", function (req, res) {
     .catch((err) => res.json(err));
 });
 
-app.get("/api/users/:_id/logs", function (req, res) {
+app.get("/api/users/:_id/logs/:from?/:to?/:limit?", function (req, res) {
   const id = req.params._id;
   return User.findById(id, (err, userRecord) => {
     if (err) {
