@@ -33,15 +33,16 @@ app.get("/api/users", function (req, res) {
     .catch((err) => res.json(err));
 });
 
-app.get("/api/users/:_id/logs/:from?/:to?/:limit?", function (req, res) {
-  const id = req.params._id;
-  return User.findById(id, (err, userRecord) => {
+app.get("/api/users/:_id/logs", function (req, res) {
+  const { _id } = req.params._id;
+  return User.findById(_id, (err, userRecord) => {
     if (err) {
       console.log(err);
     } else {
+      // console.log(userRecord.username);
       res.json({
-        _id: id.toString(),
-        username: userRecord.username,
+        _id: _id,
+        // username: userRecord.username,
         count: userRecord.log.length,
         log: userRecord.log,
       });
@@ -64,8 +65,8 @@ app.post("/api/users", async function (req, res) {
   });
 });
 
-app.post("/api/users/:_id/exercises", function (req, res) {
-  const id = req.params._id;
+app.post("/api/users/:_id/exercises", async function (req, res) {
+  const { _id } = req.params;
   const { date, duration, description } = req.body;
   function makeDate(string) {
     if (!date) {
@@ -74,14 +75,14 @@ app.post("/api/users/:_id/exercises", function (req, res) {
       return new Date(string).toDateString();
     }
   }
-  User.findById(id, (err, userRecord) => {
+  User.findById(_id, async (err, userRecord) => {
     if (err) {
       console.log(err);
     } else {
-      userRecord.log.push({ date, duration, description });
-      userRecord.save();
+      await userRecord.log.push({ date, duration, description });
+      await userRecord.save();
       res.json({
-        id: id,
+        _id: _id,
         username: userRecord.username,
         date: makeDate(date),
         duration: parseInt(duration),
