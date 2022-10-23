@@ -34,15 +34,14 @@ app.get("/api/users", function (req, res) {
 });
 
 app.get("/api/users/:_id/logs", function (req, res) {
-  const { _id } = req.params._id;
+  const { _id } = req.params;
   return User.findById(_id, (err, userRecord) => {
     if (err) {
       console.log(err);
     } else {
-      // console.log(userRecord.username);
       res.json({
         _id: _id,
-        // username: userRecord.username,
+        username: userRecord.username,
         count: userRecord.log.length,
         log: userRecord.log,
       });
