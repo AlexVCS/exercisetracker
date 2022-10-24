@@ -33,8 +33,13 @@ app.get("/api/users", function (req, res) {
     .catch((err) => res.json(err));
 });
 
-app.get("/api/users/:_id/logs", function (req, res) {
+app.get("/api/users/:_id/logs?", function (req, res) {
   const { _id } = req.params;
+  const from = req.query.from || new Date(0);
+  const to = req.query.to;
+  const limit = Number(req.query.limit) || 0;
+  // const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+  // if (!from.match(dateRegEx) && !to.match(dateRegEx)) return console.log(err);
   return User.findById(_id, (err, userRecord) => {
     if (err) {
       console.log(err);
