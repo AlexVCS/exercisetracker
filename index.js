@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     {
       description: String,
       duration: Number,
-      date: String,
+      date: Date,
     },
   ],
 });
@@ -101,7 +101,7 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
         _id: _id,
         username: userRecord.username,
         date: makeDate(date),
-        duration: parseInt(duration),
+        duration: duration,
         description: description,
       });
     }
