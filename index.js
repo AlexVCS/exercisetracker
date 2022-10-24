@@ -22,10 +22,21 @@ mongoose.connect(`${myURI}`);
 const userSchema = new mongoose.Schema({
   username: String,
   _id: String,
-  log: [],
+  log: [
+    {
+      description: String,
+      duration: Number,
+      date: String,
+    },
+  ],
 });
 
 const User = mongoose.model("User", userSchema);
+
+// User.deleteMany({}, function (err, result) {
+//   if (err) return handleError(err);
+//   console.log(result);
+// });
 
 app.get("/api/users", function (req, res) {
   User.find()
@@ -45,7 +56,7 @@ app.get("/api/users/:_id/logs?", function (req, res) {
       console.log(err);
     } else {
       res.json({
-        _id: _id,
+        _id: userRecord._id,
         username: userRecord.username,
         count: userRecord.log.length,
         log: userRecord.log,
@@ -63,6 +74,7 @@ app.post("/api/users", async function (req, res) {
     log: [],
   });
   const userRecord = await newUser.save();
+  console.log(userRecord);
   res.json({
     _id: userRecord._id,
     username: userRecord.username,
