@@ -26,7 +26,7 @@ const userSchema = new mongoose.Schema({
     {
       description: String,
       duration: Number,
-      date: Date,
+      date: String,
     },
   ],
 });
@@ -46,9 +46,9 @@ app.get("/api/users", function (req, res) {
 
 app.get("/api/users/:_id/logs?", function (req, res) {
   const { _id } = req.params;
-  const from = req.query.from || new Date(0);
-  const to = req.query.to;
-  const limit = Number(req.query.limit) || 0;
+  // const from = req.query.from;
+  // const to = req.query.to;
+  // const limit = Number(req.query.limit);
   // const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   // if (!from.match(dateRegEx) && !to.match(dateRegEx)) return console.log(err);
   return User.findById(_id, (err, userRecord) => {
@@ -56,7 +56,7 @@ app.get("/api/users/:_id/logs?", function (req, res) {
       console.log(err);
     } else {
       res.json({
-        _id: userRecord._id,
+        _id: _id,
         username: userRecord.username,
         count: userRecord.log.length,
         log: userRecord.log,
@@ -74,7 +74,7 @@ app.post("/api/users", async function (req, res) {
     log: [],
   });
   const userRecord = await newUser.save();
-  console.log(userRecord);
+  // console.log(userRecord);
   res.json({
     _id: userRecord._id,
     username: userRecord.username,
