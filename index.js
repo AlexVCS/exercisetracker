@@ -1,12 +1,10 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const router = express.Router();
 const app = express();
 const cors = require("cors");
 require("dotenv").config();
 const myURI = process.env["MONGO_URI"];
 const crypto = require("crypto");
-const { doesNotMatch } = require("assert");
 
 app.use(cors());
 app.use(express.static("public"));
@@ -84,11 +82,14 @@ app.post("/api/users", async function (req, res) {
 app.post("/api/users/:_id/exercises", async function (req, res) {
   const { _id } = req.params;
   const { date, duration, description } = req.body;
+  function isValidDate(string) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(string);
+  }
   function makeDate(string) {
-    if (!date) {
-      return new Date().toDateString();
-    } else {
+    if (isValidDate(date)) {
       return new Date(string).toDateString();
+    } else {
+      return new Date().toDateString();
     }
   }
   User.findById(_id, async (err, userRecord) => {
