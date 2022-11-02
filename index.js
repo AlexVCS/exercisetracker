@@ -5,6 +5,7 @@ const cors = require("cors");
 require("dotenv").config();
 const myURI = process.env["MONGO_URI"];
 const crypto = require("crypto");
+const morgan = require("morgan");
 
 app.use(cors());
 app.use(express.static("public"));
@@ -17,6 +18,14 @@ app.use(express.urlencoded({ extended: true }));
 
 mongoose.connect(`${myURI}`);
 
+// app.use(
+//   "/",
+//   (logger = (req, res, next) => {
+//     console.log(`${req.body} ${req.params} - ${res.ip}`);
+//     next();
+//   })
+// );
+
 const userSchema = new mongoose.Schema({
   username: String,
   _id: String,
@@ -24,7 +33,7 @@ const userSchema = new mongoose.Schema({
     {
       description: String,
       duration: Number,
-      date: String,
+      date: Date,
     },
   ],
 });
@@ -53,6 +62,7 @@ app.get("/api/users/:_id/logs?", function (req, res) {
     if (err) {
       console.log(err);
     } else {
+      // console.log(userRecord.log);
       res.json({
         _id: _id,
         username: userRecord.username,
@@ -98,12 +108,13 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
     } else {
       await userRecord.log.push({ date, duration, description });
       await userRecord.save();
+      // console.log(userRecord);
       res.json({
-        _id: _id,
         username: userRecord.username,
-        date: makeDate(date),
-        duration: duration,
         description: description,
+        duration: duration,
+        date: makeDate(date),
+        _id: _id,
       });
     }
   });
