@@ -5,7 +5,7 @@ const cors = require("cors");
 require("dotenv").config();
 const myURI = process.env["MONGO_URI"];
 const crypto = require("crypto");
-const morgan = require("morgan");
+// const morgan = require("morgan");
 
 app.use(cors());
 app.use(express.static("public"));
@@ -52,17 +52,25 @@ app.get("/api/users", function (req, res) {
 });
 
 app.get("/api/users/:_id/logs?", function (req, res) {
+  // logging
+  console.log("GET Logs");
+  console.log(`req.body: ${JSON.stringify(req.body)}`);
+  console.log(`req.params: ${JSON.stringify(req.params)}`);
+  console.log(`req.query: ${JSON.stringify(req.query)}`);
+
   const { _id } = req.params;
   // const from = req.query.from;
   // const to = req.query.to;
   // const limit = Number(req.query.limit);
   // const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   // if (!from.match(dateRegEx) && !to.match(dateRegEx)) return console.log(err);
-  return User.findById(_id, (err, userRecord) => {
+  User.findById(_id, (err, userRecord) => {
     if (err) {
       console.log(err);
     } else {
+      console.log(userRecord);
       // console.log(userRecord.log);
+      // console.log(stringify(res.json));
       res.json({
         _id: _id,
         username: userRecord.username,
@@ -74,6 +82,12 @@ app.get("/api/users/:_id/logs?", function (req, res) {
 });
 
 app.post("/api/users", async function (req, res) {
+  // logging
+  console.log("POST Users");
+  console.log(`req.body: ${JSON.stringify(req.body)}`);
+  console.log(`req.params: ${JSON.stringify(req.params)}`);
+  console.log(`req.query: ${JSON.stringify(req.query)}`);
+
   let nameToString = req.body.username.toString();
   let hash = crypto.randomBytes(20).toString("hex");
   const newUser = new User({
@@ -90,6 +104,12 @@ app.post("/api/users", async function (req, res) {
 });
 
 app.post("/api/users/:_id/exercises", async function (req, res) {
+  // logging
+  console.log("POST exercise");
+  console.log(`req.body: ${JSON.stringify(req.body)}`);
+  console.log(`req.params: ${JSON.stringify(req.params)}`);
+  console.log(`req.query: ${JSON.stringify(req.query)}`);
+
   const { _id } = req.params;
   const { date, duration, description } = req.body;
   function isValidDate(string) {
@@ -109,6 +129,7 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
       await userRecord.log.push({ date, duration, description });
       await userRecord.save();
       // console.log(userRecord);
+      // console.log(JSON.stringify(res));
       res.json({
         username: userRecord.username,
         description: description,
