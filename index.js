@@ -64,7 +64,7 @@ app.get("/api/users/:_id/logs?", function (req, res) {
   // const limit = Number(req.query.limit);
   // const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
   // if (!from.match(dateRegEx) && !to.match(dateRegEx)) return console.log(err);
-  User.findById(_id, (err, userRecord) => {
+  User.findById(_id, async (err, userRecord) => {
     if (err) {
       console.log(err);
     } else {
@@ -116,7 +116,7 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
     return /^\d{4}-\d{2}-\d{2}$/.test(string);
   }
   function makeDate(string) {
-    if (isValidDate(date)) {
+    if (isValidDate(string)) {
       return new Date(string).toDateString();
     } else {
       return new Date().toDateString();
@@ -128,12 +128,12 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
     } else {
       await userRecord.log.push({ date, duration, description });
       await userRecord.save();
-      // console.log(userRecord);
+      console.log("This is the userRecord " + userRecord);
       // console.log(JSON.stringify(res));
       res.json({
         username: userRecord.username,
         description: description,
-        duration: duration,
+        duration: parseInt(duration),
         date: makeDate(date),
         _id: _id,
       });
