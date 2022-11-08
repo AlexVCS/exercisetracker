@@ -5,9 +5,12 @@ const cors = require("cors");
 require("dotenv").config();
 const myURI = process.env["MONGO_URI"];
 const crypto = require("crypto");
+bodyParser = require("body-parser");
+
 // const morgan = require("morgan");
 
 app.use(cors());
+app.use(bodyParser.json());
 app.use(express.static("public"));
 app.get("/", (req, res) => {
   res.sendFile(__dirname + "/views/index.html");
@@ -33,7 +36,7 @@ const userSchema = new mongoose.Schema({
     {
       description: String,
       duration: Number,
-      date: Date,
+      date: String,
     },
   ],
 });
@@ -96,7 +99,7 @@ app.post("/api/users", async function (req, res) {
     log: [],
   });
   const userRecord = await newUser.save();
-  // console.log(userRecord);
+  console.log(await newUser.save());
   res.json({
     _id: userRecord._id,
     username: userRecord.username,
@@ -106,22 +109,28 @@ app.post("/api/users", async function (req, res) {
 app.post("/api/users/:_id/exercises", async function (req, res) {
   // logging
   console.log("POST exercise");
-  console.log(`req.body: ${JSON.stringify(req.body)}`);
   console.log(`req.params: ${JSON.stringify(req.params)}`);
   console.log(`req.query: ${JSON.stringify(req.query)}`);
 
   const { _id } = req.params;
   const { date, duration, description } = req.body;
-  function isValidDate(string) {
-    return /^\d{4}-\d{2}-\d{2}$/.test(string);
+  parseInt(duration);
+
+  console.log(`req.body: ${JSON.stringify(req.body)}`);
+  console.log(`date: ${JSON.stringify(date)}`);
+  function isValidDate(date) {
+    return /^\d{4}-\d{2}-\d{2}$/.test(date);
   }
-  function makeDate(string) {
-    if (isValidDate(string)) {
-      return new Date(string).toDateString();
-    } else {
+  function makeDate(date) {
+    if (!isValidDate(date)) {
       return new Date().toDateString();
+    } else {
+      return new Date(date).toDateString();
     }
   }
+
+  // req.body.date = makeDate(date);
+
   User.findById(_id, async (err, userRecord) => {
     if (err) {
       console.log(err);
@@ -129,11 +138,12 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
       await userRecord.log.push({ date, duration, description });
       await userRecord.save();
       console.log("This is the userRecord " + userRecord);
+      console.log("this is date " + req.body.date);
       // console.log(JSON.stringify(res));
       res.json({
         username: userRecord.username,
         description: description,
-        duration: parseInt(duration),
+        duration: duration,
         date: makeDate(date),
         _id: _id,
       });
