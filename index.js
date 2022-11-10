@@ -1,11 +1,10 @@
+require("dotenv").config();
 const express = require("express");
 const mongoose = require("mongoose");
-const app = express();
 const cors = require("cors");
-require("dotenv").config();
-const myURI = process.env["MONGO_URI"];
 const crypto = require("crypto");
 bodyParser = require("body-parser");
+const app = express();
 
 // const morgan = require("morgan");
 
@@ -19,6 +18,7 @@ app.get("/", (req, res) => {
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
+const myURI = process.env["MONGO_URI"];
 mongoose.connect(`${myURI}`);
 
 // app.use(
@@ -115,6 +115,8 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
   const { _id } = req.params;
   const { date, duration, description } = req.body;
   parseInt(duration);
+  // let currentDate;
+  // let specificDate;
 
   console.log(`req.body: ${JSON.stringify(req.body)}`);
   console.log(`date: ${JSON.stringify(date)}`);
@@ -135,16 +137,31 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
     if (err) {
       console.log(err);
     } else {
-      await userRecord.log.push({ date, duration, description });
-      await userRecord.save();
-      console.log("This is the userRecord " + userRecord);
-      console.log("this is date " + req.body.date);
-      // console.log(JSON.stringify(res));
-      res.json({
-        username: userRecord.username,
+      let newExerise = {
         description: description,
         duration: duration,
         date: makeDate(date),
+      };
+      await userRecord.log.push(newExerise);
+      console.log(userRecord.log);
+      // await User.save()
+      await userRecord.save();
+      console.log("This is the userRecord " + userRecord);
+      console.log("this is date " + req.body.date);
+      // let savedExercise = {
+      console.log(
+        "last log entry " + userRecord.log[userRecord.log.length - 1]
+      );
+
+      const savedLogEntry = userRecord.log[userRecord.log.length - 1];
+
+      // };
+      // console.log(JSON.stringify(res));
+      res.json({
+        username: userRecord.username,
+        description: savedLogEntry.description,
+        duration: savedLogEntry.duration,
+        date: savedLogEntry.date,
         _id: _id,
       });
     }
