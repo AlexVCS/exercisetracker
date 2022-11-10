@@ -62,13 +62,10 @@ app.get("/api/users/:_id/logs?", function (req, res) {
   console.log(`req.query: ${JSON.stringify(req.query)}`);
 
   const { _id } = req.params;
-  // const from = req.query.from;
-  // const to = req.query.to;
-  // const limit = Number(req.query.limit);
-  // const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
-  // if (!from.match(dateRegEx) && !to.match(dateRegEx)) return console.log(err);
+  const { from, to, limit } = req.query;
+  const validDate = /^\d{4}-\d{2}-\d{2}$/;
   User.findById(_id, async (err, userRecord) => {
-    if (err) {
+    if (err && !from.match(validDate) && !to.match(validDate)) {
       console.log(err);
     } else {
       console.log(userRecord);
@@ -114,9 +111,6 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
 
   const { _id } = req.params;
   const { date, duration, description } = req.body;
-  parseInt(duration);
-  // let currentDate;
-  // let specificDate;
 
   console.log(`req.body: ${JSON.stringify(req.body)}`);
   console.log(`date: ${JSON.stringify(date)}`);
@@ -131,15 +125,13 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
     }
   }
 
-  // req.body.date = makeDate(date);
-
   User.findById(_id, async (err, userRecord) => {
     if (err) {
       console.log(err);
     } else {
       let newExerise = {
         description: description,
-        duration: duration,
+        duration: parseInt(duration),
         date: makeDate(date),
       };
       await userRecord.log.push(newExerise);
