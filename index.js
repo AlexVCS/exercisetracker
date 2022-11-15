@@ -6,8 +6,6 @@ const crypto = require("crypto");
 bodyParser = require("body-parser");
 const app = express();
 
-// const morgan = require("morgan");
-
 app.use(cors());
 app.use(bodyParser.json());
 app.use(express.static("public"));
@@ -20,14 +18,6 @@ app.use(express.urlencoded({ extended: true }));
 
 const myURI = process.env["MONGO_URI"];
 mongoose.connect(`${myURI}`);
-
-// app.use(
-//   "/",
-//   (logger = (req, res, next) => {
-//     console.log(`${req.body} ${req.params} - ${res.ip}`);
-//     next();
-//   })
-// );
 
 const userSchema = new mongoose.Schema({
   username: String,
@@ -62,15 +52,30 @@ app.get("/api/users/:_id/logs?", function (req, res) {
   console.log(`req.query: ${JSON.stringify(req.query)}`);
 
   const { _id } = req.params;
-  const { from, to, limit } = req.query;
+  let query = {};
+  let from = req.query.from;
+  let to = req.query.to;
+  let limit = req.query.limit;
   const validDate = /^\d{4}-\d{2}-\d{2}$/;
+
   User.findById(_id, async (err, userRecord) => {
-    if (err && !from.match(validDate) && !to.match(validDate)) {
+    if (err) {
       console.log(err);
+      res.json("Invalid request please try again");
     } else {
-      console.log(userRecord);
-      // console.log(userRecord.log);
-      // console.log(stringify(res.json));
+      // error conditions
+      // !validDate.test(from) ||
+      // !validDate.test(to) ||
+      // limit !== Number
+
+      // $gte greater than or = to
+      // $lte less than or = to
+      // https://www.mongodb.com/docs/manual/reference/operator/query/gte/
+
+      User.find({ sort: { date: -1 }, limit: limit }, function (err, User) {
+        if (err) return "Invalid request";
+        return User;
+      });
       res.json({
         _id: _id,
         username: userRecord.username,
@@ -136,19 +141,14 @@ app.post("/api/users/:_id/exercises", async function (req, res) {
       };
       await userRecord.log.push(newExerise);
       console.log(userRecord.log);
-      // await User.save()
       await userRecord.save();
       console.log("This is the userRecord " + userRecord);
       console.log("this is date " + req.body.date);
-      // let savedExercise = {
       console.log(
         "last log entry " + userRecord.log[userRecord.log.length - 1]
       );
 
       const savedLogEntry = userRecord.log[userRecord.log.length - 1];
-
-      // };
-      // console.log(JSON.stringify(res));
       res.json({
         username: userRecord.username,
         description: savedLogEntry.description,
