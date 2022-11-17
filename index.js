@@ -44,48 +44,6 @@ app.get("/api/users", function (req, res) {
     .catch((err) => res.json(err));
 });
 
-app.get("/api/users/:_id/logs?", function (req, res) {
-  // logging
-  console.log("GET Logs");
-  console.log(`req.body: ${JSON.stringify(req.body)}`);
-  console.log(`req.params: ${JSON.stringify(req.params)}`);
-  console.log(`req.query: ${JSON.stringify(req.query)}`);
-
-  const { _id } = req.params;
-  let query = {};
-  let from = req.query.from;
-  let to = req.query.to;
-  let limit = req.query.limit;
-  const validDate = /^\d{4}-\d{2}-\d{2}$/;
-
-  User.findById(_id, async (err, userRecord) => {
-    if (err) {
-      console.log(err);
-      res.json("Invalid request please try again");
-    } else {
-      // error conditions
-      // !validDate.test(from) ||
-      // !validDate.test(to) ||
-      // limit !== Number
-
-      // $gte greater than or = to
-      // $lte less than or = to
-      // https://www.mongodb.com/docs/manual/reference/operator/query/gte/
-
-      User.find({ sort: { date: -1 }, limit: limit }, function (err, User) {
-        if (err) return "Invalid request";
-        return User;
-      });
-      res.json({
-        _id: _id,
-        username: userRecord.username,
-        count: userRecord.log.length,
-        log: userRecord.log,
-      });
-    }
-  });
-});
-
 app.post("/api/users", async function (req, res) {
   // logging
   console.log("POST Users");
@@ -105,6 +63,54 @@ app.post("/api/users", async function (req, res) {
   res.json({
     _id: userRecord._id,
     username: userRecord.username,
+  });
+});
+
+app.get("/api/users/:_id/logs?", function (req, res) {
+  // logging
+  console.log("GET Logs");
+  console.log(`req.body: ${JSON.stringify(req.body)}`);
+  console.log(`req.params: ${JSON.stringify(req.params)}`);
+  console.log(`req.query: ${JSON.stringify(req.query)}`);
+
+  const { _id } = req.params;
+  let query = {};
+  let from = req.query.from;
+  let to = req.query.to;
+  let limit = req.query.limit;
+  const validDate = /^\d{4}-\d{2}-\d{2}$/;
+
+  User.findById(_id, async (err, userRecord) => {
+    if (err && limit !== Number) {
+      console.log(err);
+      res.json("Invalid request please try again");
+    } else {
+      // error conditions
+      // !validDate.test(from) ||
+      // !validDate.test(to) ||
+      // limit !== Number
+
+      // zod library
+
+      const logCopy = [...userRecord.log];
+      console.log(`this is the userRecord.log ` + logCopy);
+      const logLimit = logCopy.slice(limit);
+
+      // $gte greater than or = to
+      // $lte less than or = to
+      // https://www.mongodb.com/docs/manual/reference/operator/query/gte/
+
+      // User.find({ sort: { date: -1 }, limit: limit }, function (err, User) {
+      //   if (err) return "Invalid request";
+      //   return User;
+      // });
+      res.json({
+        _id: _id,
+        username: userRecord.username,
+        count: logLimit.length,
+        log: logLimit,
+      });
+    }
   });
 });
 
