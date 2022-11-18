@@ -77,11 +77,11 @@ app.get("/api/users/:_id/logs?", function (req, res) {
   let query = {};
   let from = req.query.from;
   let to = req.query.to;
-  let limit = req.query.limit;
+  let limit = parseInt(req.query.limit);
   const validDate = /^\d{4}-\d{2}-\d{2}$/;
 
   User.findById(_id, async (err, userRecord) => {
-    if (err && limit !== Number) {
+    if (err) {
       console.log(err);
       res.json("Invalid request please try again");
     } else {
@@ -94,21 +94,18 @@ app.get("/api/users/:_id/logs?", function (req, res) {
 
       const logCopy = [...userRecord.log];
       console.log(`this is the userRecord.log ` + logCopy);
-      const logLimit = logCopy.slice(limit);
+      console.log(`this is the limit ` + typeof limit);
+      const logLimit = logCopy.slice(0, limit);
 
       // $gte greater than or = to
       // $lte less than or = to
       // https://www.mongodb.com/docs/manual/reference/operator/query/gte/
 
-      // User.find({ sort: { date: -1 }, limit: limit }, function (err, User) {
-      //   if (err) return "Invalid request";
-      //   return User;
-      // });
       res.json({
         _id: _id,
         username: userRecord.username,
-        count: logLimit.length,
-        log: logLimit,
+        count: !limit ? userRecord.log.length : logLimit.length,
+        log: !limit ? userRecord.log : logLimit,
       });
     }
   });
